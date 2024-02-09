@@ -15,6 +15,7 @@ HEADERS = {
 CLICKHOUSE_HOST = "https://github.demo.trial.altinity.cloud:8443/?add_http_cors_header=1&default_format=JSONCompact&max_result_rows=1000&max_result_bytes=10000000&result_overflow_mode=break"
 
 METRICS_SQL = """
+WITH 4 AS num_weeks
 SELECT
     concat(
         YEAR(pickup_date), 
@@ -22,10 +23,10 @@ SELECT
         LPAD(CAST(MONTH(pickup_date) as CHAR), 2, '0')
     ) AS Month,
     -- Use CASE WHEN to conditionally aggregate based on day_of_week
-    SUM(CASE WHEN DAYOFWEEK(pickup_date) = 6 THEN 1 ELSE 0 END) AS sat_mean_trip_count,
+    SUM(CASE WHEN DAYOFWEEK(pickup_date) = 6 THEN 1 ELSE 0 END) / num_weeks AS sat_mean_trip_count,
     AVG(CASE WHEN DAYOFWEEK(pickup_date) = 6 THEN fare_amount ELSE NULL END) AS sat_mean_fare_per_trip,
     AVG(CASE WHEN DAYOFWEEK(pickup_date) = 6 THEN TIMEDIFF(pickup_datetime,dropoff_datetime) ELSE NULL END) AS sat_mean_duration_per_trip,
-    SUM(CASE WHEN DAYOFWEEK(pickup_date) = 7 THEN 1 ELSE 0 END) AS sun_mean_trip_count,
+    SUM(CASE WHEN DAYOFWEEK(pickup_date) = 7 THEN 1 ELSE 0 END) / num_weeks AS sun_mean_trip_count,
     AVG(CASE WHEN DAYOFWEEK(pickup_date) = 7 THEN fare_amount ELSE NULL END) AS sun_mean_fare_per_trip,
     AVG(CASE WHEN DAYOFWEEK(pickup_date) = 7 THEN TIMEDIFF(pickup_datetime,dropoff_datetime) ELSE NULL END) AS sun_mean_duration_per_trip
 FROM tripdata
